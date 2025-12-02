@@ -298,7 +298,7 @@
     const openModal = document.getElementById('openModalAddHabit');
     const closeModal = document.getElementById('closeAddHabitModal');
     const formHabit = document.querySelector('form');
-    
+
     function getCSRFToken() {
         return document.querySelector('[name=csrfmiddlewaretoken]').value;
     }
@@ -306,111 +306,134 @@
     function openEditModal() {
         const modalOverlayHabit = document.getElementById('modalOverlayHabit');
         modalOverlayHabit.style.display = 'none';
-        
-        const modalOverlay = document.getElementById('modalOverlay');
         modalOverlay.style.display = 'flex';
         document.body.style.overflow = 'hidden';
     }
-    
+
     function openHabitModal(habitId) {
         fetch(`/habits/${habitId}/`)
-        .then(response => response.json())
-        .then(data => {
-
-            const categoryChoise = {
-                'health': 'Здоровье',
-                'sport': 'Спорт',
-                'learning': 'Образование',
-                'relationships': 'Отношения',
-                'other': 'Другое',
-            };
-            
-            document.getElementById('deleteForm').action = `/habits/${habitId}/delete/`;
-
-            document.getElementById('habitTitle').textContent = data.title;
-            document.getElementById('habitDescription').textContent = data.description;
-            document.getElementById('habitCategory').textContent = categoryChoise[data.category];
-            
-            const typeElement = document.getElementById('habitType');
-            typeElement.textContent = data.habit_type === 'useful' ? 'Полезная' : 'Вредная';
-            typeElement.className = `info-value type-badge ${data.habit_type === 'useful' ? 'useful' : 'harmful'}`;
-            
-            updateDaysDisplay(data.days_of_week || []);
-            
-            document.querySelector('.info-item:nth-child(5) .info-value').textContent = data.reminder_time || '09:00';
-            
-            document.querySelector('.info-item:nth-child(6) .info-value').textContent = `${data.duration_minutes || 15} минут`;
-            
-
-           
-            const markCompleteBtn = document.getElementById('markComplated');
-            const completeForm = document.getElementById('completedForm');
-
-            if (data.is_completed_today) {
-                markCompleteBtn.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 6 9 17l-5-5"/>
-                </svg>
-                Выполнено
-                `;
-
-                markCompleteBtn.disabled = true;
-                markCompleteBtn.classList.add('complete');
-            } else {
-                markCompleteBtn.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 6 9 17l-5-5"/>
-                </svg>
-                Выполнить
-                `;
-
-                markCompleteBtn.disabled = false;
-                markCompleteBtn.classList.remove('complete');
-
-                completeForm.action = `/habits/${habitId}/complete/`;
-            }
-            
-
-            const modalOverlayHabit = document.getElementById('modalOverlayHabit');
+            .then(response => response.json())
+            .then(data => {
+                const categoryChoise = {
+                    'health': 'Здоровье',
+                    'sport': 'Спорт',
+                    'learning': 'Образование',
+                    'relationships': 'Отношения',
+                    'other': 'Другое'
+                };
+                
+                document.getElementById('deleteForm').action = `/habits/${habitId}/delete/`;
+                document.getElementById('habitTitle').textContent = data.title;
+                document.getElementById('habitDescription').textContent = data.description;
+                document.getElementById('habitCategory').textContent = categoryChoise[data.category];
+                
+                const typeElement = document.getElementById('habitType');
+                typeElement.textContent = data.habit_type === 'useful' ? 'Полезная' : 'Вредная';
+                typeElement.className = `info-value type-badge ${data.habit_type === 'useful' ? 'useful' : 'harmful'}`;
+                
+                updateDaysDisplay(data.days_of_week || []);
+                document.querySelector('.info-item:nth-child(5) .info-value').textContent = data.reminder_time || '09:00';
+                document.querySelector('.info-item:nth-child(6) .info-value').textContent = `${data.duration_minutes || 15} минут`;
+                
+                const markCompleteBtn = document.getElementById('markComplated');
+                const completeForm = document.getElementById('completedForm');
+                
+                if (data.is_completed_today) {
+                    markCompleteBtn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 6 9 17l-5-5"/>
+                        </svg>
+                        Выполнено
+                    `;
+                    markCompleteBtn.disabled = true;
+                    markCompleteBtn.classList.add('complete');
+                } else {
+                    markCompleteBtn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 6 9 17l-5-5"/>
+                        </svg>
+                        Выполнить
+                    `;
+                    markCompleteBtn.disabled = false;
+                    markCompleteBtn.classList.remove('complete');
+                    completeForm.action = `/habits/${habitId}/complete/`;
+                }
+                
+                const modalOverlayHabit = document.getElementById('modalOverlayHabit');
                 modalOverlayHabit.style.display = 'flex';
                 document.body.style.overflow = 'hidden';
             })
-            .catch(error => {
-                alert('Не удалось загрузить данные привычки');
-            });
+            .catch(() => alert('Не удалось загрузить данные привычки'));
+    }
+
+    function updateDaysDisplay(daysOfWeek) {
+        const daysContainer = document.getElementById('habitDays');
+        const daysMap = {
+            'mon': { short: 'Пн', full: 'Понедельник' },
+            'tue': { short: 'Вт', full: 'Вторник' },
+            'wed': { short: 'Ср', full: 'Среда' },
+            'thu': { short: 'Чт', full: 'Четверг' },
+            'fri': { short: 'Пт', full: 'Пятница' },
+            'sat': { short: 'Сб', full: 'Суббота' },
+            'sun': { short: 'Вс', full: 'Воскресенье' }
         };
         
-        function updateDaysDisplay(daysOfWeek) {
-            const daysContainer = document.getElementById('habitDays');
-            const daysMap = {
-                'mon': { short: 'Пн', full: 'Понедельник' },
-                'tue': { short: 'Вт', full: 'Вторник' },
-                'wed': { short: 'Ср', full: 'Среда' },
-                'thu': { short: 'Чт', full: 'Четверг' },
-                'fri': { short: 'Пт', full: 'Пятница' },
-                'sat': { short: 'Сб', full: 'Суббота' },
-                'sun': { short: 'Вс', full: 'Воскресенье' }
-            };
-            
-            daysContainer.innerHTML = '';
-            
-            Object.entries(daysMap).forEach(([key, dayInfo]) => {
-                const isActive = daysOfWeek.includes(key);
-                const dayElement = document.createElement('span');
-                dayElement.className = `day-badge ${isActive ? 'active' : ''}`;
-                dayElement.textContent = dayInfo.short;
-                dayElement.title = dayInfo.full;
-                
-                daysContainer.appendChild(dayElement);
-            });
-        }
+        daysContainer.innerHTML = '';
         
-        openModal.addEventListener('click', function() {
-            modalOverlay.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
+        Object.entries(daysMap).forEach(([key, dayInfo]) => {
+            const isActive = daysOfWeek.includes(key);
+            const dayElement = document.createElement('span');
+            dayElement.className = `day-badge ${isActive ? 'active' : ''}`;
+            dayElement.textContent = dayInfo.short;
+            dayElement.title = dayInfo.full;
+            daysContainer.appendChild(dayElement);
+        });
+    }
+
+    function updateHabitsList(habits) {
+        const habitsList = document.querySelector('.habits-list');
+        habitsList.innerHTML = '';
+        
+        habits.forEach(habit => {
+            const habitCard = document.createElement('li');
+            habitCard.className = 'habit-card';
+            habitCard.setAttribute('onclick', `openHabitModal(${habit.id})`);
+            
+            habitCard.innerHTML = `
+                <h4 class="habit-title">${habit.title}</h4>
+                <div class="habit-streak" data-days="5">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+                    </svg>
+                    <p>${habit.current_streak} дней</p>
+                </div>
+            `;
+            habitsList.appendChild(habitCard);
+        });
+    }
+
+    function updateCategoryTitle(categoryName) {
+        const categoryTitle = document.querySelector('.main-category h2');
+        categoryTitle.textContent = categoryName;
+    }
+
+    openModal.addEventListener('click', () => {
+        modalOverlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
     });
-    
-    
+
+    closeModal.addEventListener('click', () => {
+        modalOverlay.style.display = 'none';
+        document.body.style.overflow = '';
+    });
+
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) {
+            modalOverlay.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    });
+
     formHabit.addEventListener('submit', function(e) {
         e.preventDefault();
         
@@ -430,129 +453,77 @@
             if (data.status === 'success') {
                 alert('Все четко, добавлено');
                 modalOverlay.style.display = 'none';
-
                 window.location.reload();
             } else {
                 alert('Ошибка :(' + data.message);
             }
         })
-        .catch(error => {
-            alert('Ошибка сети');
-        })
+        .catch(() => alert('Ошибка сети'))
         .finally(() => {
             addHabitBtn.textContent = 'Добавить привычку';
             addHabitBtn.disabled = false;
         });
     });
-    
-    function updateHabitsList(habits) {
-        const habitsList = document.querySelector('.habits-list');
-        habitsList.innerHTML = '';
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const categoryFilters = document.querySelectorAll('.category-filter');
+        const statusFilters = document.querySelectorAll('.status-filter');
+        const durationBtns = document.querySelectorAll('.duration-btn');
+        const durationInput = document.getElementById('duration');
+        const durationUnit = document.getElementById('durationUnit');
+        const modalOverlayHabit = document.getElementById('modalOverlayHabit');
+        const closeInfoHabit = document.getElementById('closeInfoHabit');
+        const successPopup = document.getElementById('successPopup');
+        const closePopup = document.getElementById('closePopup');
         
-        habits.forEach(habit => {
-            const habitCard = document.createElement('li');
-            habitCard.className = 'habit-card';
-            habitCard.setAttribute('onclick', `openHabitModal(${habit.id})`);
-            
-            habitCard.innerHTML = `
-            <h4 class="habit-title">${habit.title}</h4>
-            <div class="habit-streak" data-days="5">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
-                    </svg>
-                    <p>${habit.current_streak} дней</p>
-                    </div>
-                    `;
-                    
-                    habitsList.appendChild(habitCard);
-                });
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentCategory = urlParams.get('category') || 'all';
+        const currentStatus = urlParams.get('status') || 'all';
+        
+        categoryFilters.forEach(filter => {
+            if (filter.dataset.category === currentCategory) {
+                filter.classList.add('active');
             }
             
-            document.addEventListener('DOMContentLoaded', function() {
-                const categoryFilters = document.querySelectorAll('.category-filter');
+            filter.addEventListener('click', function() {
+                const category = this.dataset.category;
+                const habitsList = document.querySelector('.habits-list');
+                habitsList.innerHTML = '<div class="loading">Загрузка...</div>';
                 
-                categoryFilters.forEach(filter => {
-                    filter.addEventListener('click', function() {
-                        const category = this.dataset.category;
-                        
-                        const habitsList = document.querySelector('.habits-list');
-                        habitsList.innerHTML = '<div class="loading">Загрузка...</div>';
-                        
-                        fetch(`/habits/habits_list/?category=${category}&ajax=true`)
-                        .then(response => response.json())
-                        .then(data => {
-                            updateHabitsList(data.habits);
-                            updateCategoryTitle(data.category_name);
-                            
-                            categoryFilters.forEach(f => f.classList.remove('active'));
-                            this.classList.add('active');
-                        })
-                        .catch(error => {
-                            console.error('Ошибка:', error);
-                            habitsList.innerHTML = '<div class="error">Ошибка загрузки</div>';
-                        });
-                    });
-                });
-            });
-            
-            function updateCategoryTitle(categoryName) {
-                const categoryTitle = document.querySelector('.main-category h2');
-                categoryTitle.textContent = categoryName;
-            }
-            
-            document.addEventListener('DOMContentLoaded', function() {
-                const categoryFilters = document.querySelectorAll('.category-filter');
-                const statusFilters = document.querySelectorAll('.status-filter');
+                const url = `/habits/habits_list/?category=${category}&status=${currentStatus}&ajax=true`;
                 
-                const urlParams = new URLSearchParams(window.location.search);
-                const currentCategory = urlParams.get('category') || 'all';
-                const currentStatus = urlParams.get('status') || 'all';
-                
-                categoryFilters.forEach(filter => {
-                    if (filter.dataset.category === currentCategory) {
-                        filter.classList.add('active');
-                    }
-                    
-                    filter.addEventListener('click', function() {
-                        const category = this.dataset.category;
-                        const habitsList = document.querySelector('.habits-list');
-                        habitsList.innerHTML = '<div class="loading">Загрузка...</div>';
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        updateHabitsList(data.habits);
+                        updateCategoryTitle(data.category_name);
+                        categoryFilters.forEach(f => f.classList.remove('active'));
+                        this.classList.add('active');
                         
-                        const url = `/habits/habits_list/?category=${category}&status=${currentStatus}&ajax=true`;
-                        
-                        fetch(url)
-                        .then(response => response.json())
-                        .then(data => {
-                            updateHabitsList(data.habits);
-                            updateCategoryTitle(data.category_name);
-                            categoryFilters.forEach(f => f.classList.remove('active'));
-                            this.classList.add('active');
-                            
-                            const newUrl = new URL(window.location);
-                            newUrl.searchParams.set('category', category);
-                            window.history.pushState({}, '', newUrl);
-                        })
-                        .catch(error => {
-                            console.error('Ошибка:', error);
+                        const newUrl = new URL(window.location);
+                        newUrl.searchParams.set('category', category);
+                        window.history.pushState({}, '', newUrl);
+                    })
+                    .catch(() => {
                         habitsList.innerHTML = '<div class="error">Ошибка загрузки</div>';
                     });
-                });
             });
+        });
+        
+        statusFilters.forEach(filter => {
+            if (filter.dataset.status === currentStatus) {
+                filter.classList.add('active');
+            }
             
-            statusFilters.forEach(filter => {
-                if (filter.dataset.status === currentStatus) {
-                    filter.classList.add('active');
-                }
+            filter.addEventListener('click', function() {
+                const status = this.dataset.status;
+                const activeCategory = document.querySelector('.category-filter.active').dataset.category;
+                const habitsList = document.querySelector('.habits-list');
+                habitsList.innerHTML = '<div class="loading">Загрузка...</div>';
                 
-                filter.addEventListener('click', function() {
-                    const status = this.dataset.status;
-                    const activeCategory = document.querySelector('.category-filter.active').dataset.category;
-                    const habitsList = document.querySelector('.habits-list');
-                    habitsList.innerHTML = '<div class="loading">Загрузка...</div>';
-                    
-                    const url = `/habits/habits_list/?category=${activeCategory}&status=${status}&ajax=true`;
-                    
-                    fetch(url)
+                const url = `/habits/habits_list/?category=${activeCategory}&status=${status}&ajax=true`;
+                
+                fetch(url)
                     .then(response => response.json())
                     .then(data => {
                         updateHabitsList(data.habits);
@@ -563,87 +534,43 @@
                         newUrl.searchParams.set('status', status);
                         window.history.pushState({}, '', newUrl);
                     })
-                    .catch(error => {
-                        console.error('Ошибка:', error);
+                    .catch(() => {
                         habitsList.innerHTML = '<div class="error">Ошибка загрузки</div>';
                     });
-                });
             });
         });
         
-        document.addEventListener('DOMContentLoaded', function() {
-            const durationBtns = document.querySelectorAll('.duration-btn');
-            const durationInput = document.getElementById('duration');
-            const durationUnit = document.getElementById('durationUnit');
-            
-            durationBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const unit = this.dataset.unit;
-                    
-                    durationBtns.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    durationUnit.value = unit;
-                    
-                    if (unit === 'hours') {
-                        durationInput.max = 24;
-                        if (durationInput.value > 24) durationInput.value = 24;
-                    } else {
-                    durationInput.max = 240;
-                }
+        durationBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const unit = this.dataset.unit;
+                durationBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                durationUnit.value = unit;
+                durationInput.max = unit === 'hours' ? 24 : 240;
+                if (unit === 'hours' && durationInput.value > 24) durationInput.value = 24;
             });
         });
-    });
-    
-    closeModal.addEventListener('click', function() {
-        modalOverlay.style.display = 'none';
-        document.body.style.overflow = '';
-    });
-    
-    
-    modalOverlay.addEventListener('click', function(e) {
-        if (e.target === modalOverlay) {
-            modalOverlay.style.display = 'none';
-            document.body.style.overflow = '';
-        };
-    });
-    
-    
-    const modalOverlayHabit = document.getElementById('modalOverlayHabit');
-    const openInfoHabit = document.getElementById('openInfoHabit');
-    const closeInfoHabit = document.getElementById('closeInfoHabit');
-    
-    
-    openInfoHabit.addEventListener('click', function() {
-        modalOverlayHabit.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    })
-    
-    closeInfoHabit.addEventListener('click', function() {
-        modalOverlayHabit.style.display = 'none';
-        document.body.style.overflow = '';
-    });
-    
-    modalOverlayHabit.addEventListener('click', function(e) {
-        if (e.target === modalOverlayHabit) {
+        
+        closeInfoHabit.addEventListener('click', () => {
             modalOverlayHabit.style.display = 'none';
             document.body.style.overflow = '';
-        };
-    });
-    
-    
-    const successPopup = document.getElementById('successPopup');
-    const closePopup = document.getElementById('closePopup');
-    
-    
-    closePopup.addEventListener('click', function() {
-        successPopup.classList.remove('show');
-    });
-    
-    successPopup.addEventListener('click', function(e) {
-        if (e.target === successPopup) {
+        });
+        
+        modalOverlayHabit.addEventListener('click', (e) => {
+            if (e.target === modalOverlayHabit) {
+                modalOverlayHabit.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+        });
+        
+        closePopup.addEventListener('click', () => {
             successPopup.classList.remove('show');
-        }
+        });
+        
+        successPopup.addEventListener('click', (e) => {
+            if (e.target === successPopup) {
+                successPopup.classList.remove('show');
+            }
+        });
     });
-    
 </script>

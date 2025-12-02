@@ -6,7 +6,6 @@ class TgUser(models.Model):
     django_user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='telegram_user', null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     temp_username = models.CharField(max_length=150, blank=True, null=True)
-    auth_step = models.CharField(max_length=20, default='idle')
 
 
     auth_step = models.CharField(

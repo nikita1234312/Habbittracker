@@ -18,8 +18,7 @@ def profile_edit_view(request):
         form = ProfileEditForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
-            # Перенаправляем на страницу профиля
-            return redirect('profile')  # ← Это вызовет profileView с обновленными данными
+            return redirect('profile') 
     
     form = ProfileEditForm(instance=profile)
 

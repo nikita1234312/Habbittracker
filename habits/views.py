@@ -20,7 +20,6 @@ def habit_detail(request, habit_id):
         'habit_type': habit.habit_type,
         'days_of_week': habit.days_of_week,
         'reminder_time': habit.reminder_time.strftime('%H:%M'),
-        'duration_minutes': habit.duration_minutes,
         'is_completed_today': habit.is_completed_today
     }
 
@@ -99,8 +98,6 @@ def habits_list(request):
         habits = habits.filter(category=selected_category)
     
     if selected_status != 'all':
-        # if selected_status == 'active':
-        #     habits = habits.filter(is_active=True)
         if selected_status == 'completed':
             time_24_hours_ago = timezone.now() - timedelta(hours=24)
             habits = habits.filter(last_completed=date.today())
@@ -125,7 +122,6 @@ def habits_list(request):
         })
 
     total_habits = habits.count()
-    # active_habits = habits.filter(is_active=True).count()
 
     category_name = 'Все'
     if selected_category != 'all':
@@ -139,7 +135,6 @@ def habits_list(request):
     context = {
         'habits': habits,
         'total_habits': total_habits,
-        # 'active_habits': active_habits,
         'current_category': selected_category, 
         'category_name': category_name,         
         'categories': HabitModel.CATEGORY_CHOICES,
